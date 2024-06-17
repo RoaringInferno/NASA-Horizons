@@ -5,7 +5,8 @@
 
 #pragma once
 
-class CircularDegreeCoordinate {
+class CircularDegreeCoordinate
+{
     /**
      * @var bitmask
      * @brief Bitmask for the circular degree coordinate.
@@ -49,7 +50,8 @@ public:
     }
 };
 
-class VerticalDegreeCoordinate {
+class VerticalDegreeCoordinate
+{
     /**
      * @var bitmask
      * @brief Bitmask for the vertical degree coordinate.
@@ -96,7 +98,8 @@ public:
     }
 };
 
-class DegreeCoordinatePair {
+class DegreeCoordinatePair
+{
     VerticalDegreeCoordinate vertical;
     CircularDegreeCoordinate circular;
 public:

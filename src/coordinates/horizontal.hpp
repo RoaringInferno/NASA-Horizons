@@ -10,7 +10,8 @@
 typedef VerticalDegreeCoordinate Altitude;
 typedef CircularDegreeCoordinate Azimuth;
 
-class HorizontalCoordinate {
+class HorizontalCoordinate
+{
     Altitude altitude;
     Azimuth azimuth;
 public:

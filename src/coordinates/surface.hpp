@@ -10,7 +10,8 @@
 typedef VerticalDegreeCoordinate Latitude;
 typedef CircularDegreeCoordinate Longitude;
 
-class SurfaceCoordinate {
+class SurfaceCoordinate
+{
     Latitude latitude;
     Longitude longitude;
 public:

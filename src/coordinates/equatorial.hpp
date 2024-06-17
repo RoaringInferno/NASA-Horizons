@@ -10,7 +10,8 @@
 typedef VerticalDegreeCoordinate Declination;
 typedef CircularDegreeCoordinate RightAscension;
 
-class EquatorialCoordinate {
+class EquatorialCoordinate
+{
     Declination declination;
     RightAscension right_ascension;
 public:
