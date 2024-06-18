@@ -48,7 +48,7 @@ public:
         return url;
     }
 
-    void makeRequest(std::string output_file) const {
-        system(("curl " + generateRequestURL() + " -s >> " + output_file).c_str());
+    void makeRequest(std::string output_file_path) const {
+        system(("curl " + generateRequestURL() + " -s >> " + output_file_path).c_str());
     }
 };
