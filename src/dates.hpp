@@ -9,7 +9,8 @@
 
 enum MONTH : unsigned char
 {
-    JANUARY,
+    ERR_MONTH = 0,
+    JANUARY = 1,
     FEBRUARY,
     MARCH,
     APRIL,
@@ -40,10 +41,8 @@ class Date
 public:
     Date(unsigned int bitmask = 0) : bitmask(bitmask) {}
     Date(const Date& other) : bitmask(other.getBitmask()) {}
-    Date(signed int year, unsigned char month, unsigned char day) : bitmask((year < 0) ? (1 << 1) | ((-year & 0xFFFFF) << 1) : (year & 0xFFFFF) << 1) {
-        bitmask |= (month << 21);
-        bitmask |= (day << 25);
-    }
+    Date(signed int year, unsigned char month, unsigned char day) : bitmask(((year < 0) ? (1 << 1) | ((-year & 0xFFFFF) << 1) : (year & 0xFFFFF) << 1) | (month << 21) | (day << 25)) {}
+    Date(unsigned int year, unsigned char month, unsigned char day, bool ad = true) : bitmask(((ad) ? (year & 0xFFFFF) << 1 : (1 << 1) | ((-year & 0xFFFFF) << 1)) | (month << 21) | (day << 25)) {}
 
     // Getters
     unsigned int getBitmask() const { return bitmask; }
@@ -83,7 +82,7 @@ public:
     // Setters
     void setBitmask(unsigned int bitmask) { this->bitmask = bitmask; }
     void setYear(signed int year) { bitmask = (year < 0) ? (1 << 1) | ((-year & 0xFFFFF) << 1) : (year & 0xFFFFF) << 1; }
-    void setMonth(unsigned char month) { bitmask = (bitmask & ~(0xF << 21)) | (month << 21); }
+    void setMonth(MONTH month) { bitmask = (bitmask & ~(0xF << 21)) | (month << 21); }
     void setDay(unsigned char day) { bitmask = (bitmask & ~(0x1F << 25)) | (day << 25); }
     Date& operator=(const Date& other) {
         if (this != &other) {
@@ -131,6 +130,29 @@ YearIndex toYearIndex(MONTH month, unsigned char day)
     default:
         return 0;
     };
+}
+
+struct MonthDay
+{
+    MONTH month;
+    unsigned char day;
+};
+
+MonthDay fromYearIndex(YearIndex index)
+{
+    if (index < 31) { return {JANUARY, static_cast<unsigned char>(index + 1)}; }
+    if (index < 31 + 29) { return {FEBRUARY, static_cast<unsigned char>(index - 31 + 1)}; }
+    if (index < 31 + 29 + 31) { return {MARCH, static_cast<unsigned char>(index - 31 - 29 + 1)}; }
+    if (index < 31 + 29 + 31 + 30) { return {APRIL, static_cast<unsigned char>(index - 31 - 29 - 31 + 1)}; }
+    if (index < 31 + 29 + 31 + 30 + 31) { return {MAY, static_cast<unsigned char>(index - 31 - 29 - 31 - 30 + 1)}; }
+    if (index < 31 + 29 + 31 + 30 + 31 + 30) { return {JUNE, static_cast<unsigned char>(index - 31 - 29 - 31 - 30 - 31 + 1)}; }
+    if (index < 31 + 29 + 31 + 30 + 31 + 30 + 31) { return {JULY, static_cast<unsigned char>(index - 31 - 29 - 31 - 30 - 31 - 30 + 1)}; }
+    if (index < 31 + 29 + 31 + 30 + 31 + 30 + 31 + 31) { return {AUGUST, static_cast<unsigned char>(index - 31 - 29 - 31 - 30 - 31 - 30 - 31 + 1)}; }
+    if (index < 31 + 29 + 31 + 30 + 31 + 30 + 31 + 31 + 30) { return {SEPTEMBER, static_cast<unsigned char>(index - 31 - 29 - 31 - 30 - 31 - 30 - 31 - 31 + 1)}; }
+    if (index < 31 + 29 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31) { return {OCTOBER, static_cast<unsigned char>(index - 31 - 29 - 31 - 30 - 31 - 30 - 31 - 31 - 30 + 1)}; }
+    if (index < 31 + 29 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30) { return {NOVEMBER, static_cast<unsigned char>(index - 31 - 29 - 31 - 30 - 31 - 30 - 31 - 31 - 30 - 31 + 1)}; }
+    if (index < 31 + 29 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30 + 31) { return {DECEMBER, static_cast<unsigned char>(index - 31 - 29 - 31 - 30 - 31 - 30 - 31 - 31 - 30 - 31 - 30 + 1)}; }
+    return {ERR_MONTH, 0};
 }
 
 template<typename T>
