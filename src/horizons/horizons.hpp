@@ -34,7 +34,7 @@ class HorizonsPull
     const std::string API_URL = "https://ssd.jpl.nasa.gov/api/horizons.api";
 public:
     HorizonsPull(const std::string object, const std::string start_time, const std::string stop_time, const std::string step_size = "1d") : api_call() {
-        api_call.setParameter("COMMAND", object);
+        api_call.setParameter("COMMAND", "'" + object + "'");
         api_call.setParameter("START_TIME", start_time);
         api_call.setParameter("STOP_TIME", stop_time);
         api_call.setParameter("STEP_SIZE", step_size);
