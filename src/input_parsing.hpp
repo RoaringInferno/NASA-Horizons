@@ -5,10 +5,10 @@
 
 #include <string>
 
-const unsigned char YEAR_LENGTH = 6;
+const unsigned char YEAR_LENGTH = 4;
 
 /**
- * mm:dd:yyyyyy<a/b>
+ * mm:dd:yyyy<a/b>
  * 
  * Sets the value to 0 if the field is empty.
  * Year field is required.

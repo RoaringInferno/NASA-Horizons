@@ -158,7 +158,7 @@ MonthDay fromYearIndex(YearIndex index)
 template<typename T>
 class Year
 {
-    T[366] day_array;
+    T day_array[366];
 public:
     Year() {};
 

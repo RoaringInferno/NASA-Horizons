@@ -4,6 +4,7 @@
  */
 
 #pragma once
+#include <math.h>
 
 class CircularDegreeCoordinate
 {
@@ -33,9 +34,10 @@ public:
     unsigned char getSeconds() const { return (bitmask >> 15) & 0x3F; }
     unsigned short getMilliseconds() const { return (bitmask >> 21) & 0x3FF; }
     long double asDecimal() const { return getDegrees() + getMinutes() / 60.0 + getSeconds() / 3600.0 + getMilliseconds() / 3600000.0; }
+    long double asRadians() const { return asDecimal() * M_PI / 180.0; }
 
     // Setters
-    void setAzimuth(unsigned short degrees, unsigned char minutes, unsigned char seconds, unsigned short milliseconds) {
+    void setCoordinate(unsigned short degrees, unsigned char minutes, unsigned char seconds, unsigned short milliseconds) {
         bitmask = (degrees & 0x1FF) | ((minutes & 0x3F) << 9) | ((seconds & 0x3F) << 15) | ((milliseconds & 0x3FF) << 21);
     }
     void setDegrees(unsigned short degrees) { bitmask = (bitmask & 0xFFFFFE00) | (degrees & 0x1FF); }
@@ -80,9 +82,10 @@ public:
     unsigned char getSeconds() const { return (bitmask >> 14) & 0x3F; }
     unsigned short getMilliseconds() const { return (bitmask >> 20) & 0x3FF; }
     long double asDecimal() const { return (getSign() ? -1 : 1) * (getDegrees() + getMinutes() / 60.0 + getSeconds() / 3600.0 + getMilliseconds() / 3600000.0); }
+    long double asRadians() const { return asDecimal() * M_PI / 180.0; }
 
     // Setters
-    void setVerticalDegreeMeasure(bool sign, unsigned char degrees, unsigned char minutes, unsigned char seconds, unsigned short milliseconds) {
+    void setCoordinate(bool sign, unsigned char degrees, unsigned char minutes, unsigned char seconds, unsigned short milliseconds) {
         bitmask = (sign ? 0x1 : 0x0) | ((degrees & 0x7F) << 1) | ((minutes & 0x3F) << 8) | ((seconds & 0x3F) << 14) | ((milliseconds & 0x3FF) << 20);
     }
     void setSign(bool sign) { bitmask = (bitmask & 0xFFFFFFFE) | (sign ? 0x1 : 0x0); }
