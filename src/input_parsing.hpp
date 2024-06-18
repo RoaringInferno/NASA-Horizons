@@ -2,6 +2,7 @@
 
 #include "dates.hpp"
 #include "parsing.hpp"
+#include "coordinates/surface.hpp"
 
 #include <string>
 
@@ -111,4 +112,22 @@ Date parseDate(ReadHead date)
     }
 
     return Date(year, month, day, ad);
+}
+
+/**
+ * <N/S>xx.xxxxx
+ */
+Latitude parseLatitude(ReadHead latitude)
+{
+    char sign = latitude.peek(); // Read the first character (N/S)
+    latitude.advance(); // Skip the first character
+    long double degrees = stold(latitude.readAll()); // Read the degrees as a long double
+
+    // Apply the sign based on the first character
+    if (sign == 'S')
+    {
+        degrees = -degrees;
+    }
+
+    return Latitude(degrees);
 }

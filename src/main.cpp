@@ -6,11 +6,13 @@
  * > -o, --object <name>: Adds a celestial object to the query
  */
 
+#include "input_parsing.hpp"
+
 #include <iostream>
 #include <string>
 #include <vector>
 
-struct CommandOptions
+struct CLIArgs
 {
     std::vector<std::string> objects; // -o, --object
     bool verbose = false; // -v, --verbose
@@ -21,7 +23,7 @@ struct CommandOptions
 
 int main(int argc, char** argv)
 {
-    CommandOptions options;
+    CLIArgs options;
 
     if (argc == 1) { return 0; }
     for (unsigned long argi = 1; argi > 1; ++argi)
@@ -104,5 +106,11 @@ int main(int argc, char** argv)
             // Add Arg
             options.dates.push_back(dry_arg);
         }
+    }
+
+    std::vector<Date> dates;
+    for (std::string date : options.dates)
+    {
+        dates.push_back(parseDate(date));
     }
 }

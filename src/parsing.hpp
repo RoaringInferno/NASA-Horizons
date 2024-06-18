@@ -17,4 +17,5 @@ public:
     void retreat(unsigned long n) { pos -= n; }
 
     std::string read(unsigned long n) { return str.substr(pos, n); }
+    std::string readAll() { return str.substr(pos); }
 };
