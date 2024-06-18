@@ -1,0 +1,3 @@
+[submodule "extern/light-stax"]
+	path = extern/light-stax
+	url = https://github.com/RoaringInferno/light-stax.git

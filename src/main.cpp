@@ -7,6 +7,7 @@
  */
 
 #include "input_parsing.hpp"
+#include "equatorial-horizontal.hpp"
 
 #include <iostream>
 #include <string>
@@ -17,7 +18,8 @@ struct CLIArgs
     std::vector<std::string> objects; // -o, --object
     bool verbose = false; // -v, --verbose
     bool detailed = false; // -d, --detailed
-    std::string longitude; // -l, --longitude
+    std::string latitude; // -l, --latitude
+    bool has_latitude = false;
     std::vector<std::string> dates; // Args
 };
 
@@ -50,11 +52,12 @@ int main(int argc, char** argv)
                         return 1;
                     }
                 }
-                else if (arg == "longitude")
+                else if (arg == "latitude")
                 {
                     if (argi + 1 < argc)
                     {
-                        options.longitude = std::string(argv[argi + 1]);
+                        options.has_latitude = true;
+                        options.latitude = std::string(argv[argi + 1]);
                         ++argi;
                     }
                     else
@@ -89,7 +92,8 @@ int main(int argc, char** argv)
                     {
                         if (argi + 1 < argc)
                         {
-                            options.longitude = std::string(argv[argi + 1]);
+                            options.has_latitude = true;
+                            options.latitude = std::string(argv[argi + 1]);
                             ++argi;
                         }
                         else
@@ -108,9 +112,22 @@ int main(int argc, char** argv)
         }
     }
 
-    std::vector<Date> dates;
-    for (std::string date : options.dates)
+    unsigned long object_count = options.objects.size();
+    unsigned long date_count = options.dates.size();
+
+    // Allocate
+    EquatorialCoordinate** coordinates = new EquatorialCoordinate*[date_count];
+    for (unsigned long i = 0; i < date_count; ++i)
     {
-        dates.push_back(parseDate(date));
+        coordinates[i] = new EquatorialCoordinate[object_count];
     }
+
+
+
+    // Deallocate coordinates
+    for (unsigned long i = 0; i < date_count; ++i)
+    {
+        delete[] coordinates[i];
+    }
+    delete[] coordinates;
 }
