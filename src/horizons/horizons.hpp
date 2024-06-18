@@ -16,7 +16,7 @@ class HorizonsAPICallParameters
 
         // Ephemeris-specific
         {"SITE_COORD", "0,0,0"},
-        {"SUPPRESS_RANGE_RATES", "YES"},
+        {"SUPPRESS_RANGE_RATE", "YES"},
     };
 public:
     HorizonsAPICallParameters() {}
