@@ -2,7 +2,7 @@
 
 #include <string>
 
-const std::string CACHE_DIR = "cache/";
+const std::string CACHE_PATH = "cache/";
 
 struct YearFileID
 {
@@ -18,8 +18,11 @@ class YearSaveFilePath
 public:
     YearSaveFilePath(const YearFileID& id) : id(id) {};
 
-    std::string get() const {
-        return CACHE_DIR + id.object + "-" + id.year + YEAR_FILE_EXT;
+    std::string getFileName() const {
+        return id.object + "-" + id.year + YEAR_FILE_EXT;
+    };
+    std::string getPath() const {
+        return CACHE_PATH + getFileName();
     };
 };
 
@@ -37,7 +40,10 @@ class DaySaveFilePath
 public:
     DaySaveFilePath(const DayFileID& id) : id(id) {};
 
-    std::string get() const {
-        return CACHE_DIR + id.object + "-" + id.date + DAY_FILE_EXT;
+    std::string getFileName() const {
+        return id.object + "-" + id.date + DAY_FILE_EXT;
+    };
+    std::string getPath() const {
+        return CACHE_PATH + getFileName();
     };
 };

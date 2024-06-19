@@ -60,7 +60,7 @@ class HorizonEphemerisDataLine
     }
 
     /**
-     * RA in the format HH MM SS.ff
+     * RA in the format" HH MM SS.ff"
      */
     RightAscension parseHorizonRA(const std::string& ra_string)
     {
@@ -75,7 +75,7 @@ class HorizonEphemerisDataLine
     }
 
     /**
-     * DEC in the format sDD MM SS.ff
+     * DEC in the format "sDD MM SS.ff"
      */
     Declination parseHorizonDEC(const std::string& dec_string)
     {
