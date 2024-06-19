@@ -8,15 +8,7 @@
 #include <vector>
 #include <unordered_map>
 
-struct HorizonEphemerisData
-{
-    DateTime date;
-    EquatorialCoordinate equatorial;
-};
-
-
-
-class ParsedHorizonGeneratedEphemeris
+class HorizonEphemerisDataLine
 {
     /**
      * Date string in the format "YYYY-MON-DD HH:MM"
@@ -97,27 +89,49 @@ class ParsedHorizonGeneratedEphemeris
         return dec;
     }
 
-    HorizonEphemerisData* ephemeris_data;
+    DateTime date;
+    EquatorialCoordinate equatorial;
+public:
+    HorizonEphemerisDataLine() : date(DateTime()), equatorial(EquatorialCoordinate()) {}
+    HorizonEphemerisDataLine(std::string& line) :
+        date(parseHorizonDateTime(line.substr(1, 17))), 
+        equatorial(
+            parseHorizonDEC(line.substr(35, 11)),
+            parseHorizonRA(line.substr(23, 11))
+        )
+    {}
+    HorizonEphemerisDataLine(const HorizonEphemerisDataLine& other) : date(other.getDate()), equatorial(other.getEquatorial()) {}
+
+    DateTime getDate() const { return date; }
+    EquatorialCoordinate getEquatorial() const { return equatorial; }
+
+    HorizonEphemerisDataLine& operator=(const HorizonEphemerisDataLine& other) {
+        date = other.getDate();
+        equatorial = other.getEquatorial();
+        return *this;
+    }
+};
+
+
+
+class ParsedHorizonGeneratedEphemeris
+{
+
+    HorizonEphemerisDataLine* ephemeris_data;
 
     unsigned long size;
 public:
-    ParsedHorizonGeneratedEphemeris(HorizonGeneratedEphemeris& generated_ephemeris) : size(generated_ephemeris.getRawEphemerisData().size()), ephemeris_data(new HorizonEphemerisData[size])
+    ParsedHorizonGeneratedEphemeris(HorizonGeneratedEphemeris& generated_ephemeris) :
+        size(generated_ephemeris.getRawEphemerisData().size()),
+        ephemeris_data(new HorizonEphemerisDataLine[size])
     {
         for (unsigned int i = 0; i < size; i++)
         {
-            std::string& line = generated_ephemeris.getRawEphemerisData()[i];
-            // Parse date
-            DateTime date = parseHorizonDateTime(line.substr(1, 17));
-            // Parse RA
-            RightAscension ra = parseHorizonRA(line.substr(23, 11));
-            // Parse DEC
-            Declination dec = parseHorizonDEC(line.substr(35, 11));
-            // Store in ephemeris_data
-            ephemeris_data[i] = {date, EquatorialCoordinate(dec, ra)};
+            ephemeris_data[i] = HorizonEphemerisDataLine(generated_ephemeris.getRawEphemerisData()[i]);
         }
     }
 
-    HorizonEphemerisData* getEphemerisData() const { return ephemeris_data; }
+    HorizonEphemerisDataLine* getEphemerisData() const { return ephemeris_data; }
 
     unsigned long getSize() const { return size; }
 };
