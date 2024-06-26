@@ -21,8 +21,8 @@ class CircularDegreeCoordinate
      */
     unsigned int bitmask;
 public:
-    CircularDegreeCoordinate(unsigned int bitmask = 0) : bitmask(bitmask) {}
-    CircularDegreeCoordinate(long double radians) : bitmask(0) {
+    CircularDegreeCoordinate() : bitmask(0) {}
+    CircularDegreeCoordinate(long double radians) {
         long double degrees = radians * 180.0 / M_PI;
         unsigned short intDegrees = (unsigned short)degrees;
         unsigned char minutes = (unsigned char)((degrees - intDegrees) * 60.0);
@@ -45,6 +45,7 @@ public:
     long double asRadians() const { return asDecimal() * M_PI / 180.0; }
 
     // Setters
+    void setBitmask(unsigned int bitmask) { this->bitmask = bitmask; }
     void setCoordinate(unsigned short degrees, unsigned char minutes, unsigned char seconds, unsigned short milliseconds) {
         bitmask = (degrees & 0x1FF) | ((minutes & 0x3F) << 9) | ((seconds & 0x3F) << 15) | ((milliseconds & 0x3FF) << 21);
     }
@@ -76,8 +77,8 @@ class VerticalDegreeCoordinate
      */
     unsigned int bitmask;
 public:
-    VerticalDegreeCoordinate(unsigned int bitmask = 0) : bitmask(bitmask) {}
-    VerticalDegreeCoordinate(long double radians) : bitmask(0) {
+    VerticalDegreeCoordinate() : bitmask(0) {}
+    VerticalDegreeCoordinate(long double radians) {
         bool sign = radians < 0;
         long double degrees = fabs(radians) * 180.0 / M_PI;
         unsigned char intDegrees = (unsigned char)degrees;
@@ -102,6 +103,7 @@ public:
     long double asRadians() const { return asDecimal() * M_PI / 180.0; }
 
     // Setters
+    void setBitmask(unsigned int bitmask) { this->bitmask = bitmask; }
     void setCoordinate(bool sign, unsigned char degrees, unsigned char minutes, unsigned char seconds, unsigned short milliseconds) {
         bitmask = (sign ? 0x1 : 0x0) | ((degrees & 0x7F) << 1) | ((minutes & 0x3F) << 8) | ((seconds & 0x3F) << 14) | ((milliseconds & 0x3FF) << 20);
     }

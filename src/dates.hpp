@@ -24,6 +24,22 @@ enum MONTH : unsigned char
     DECEMBER
 };
 
+const std::string month_strings[] = {
+    "EMO",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec"
+};
+
 class Date
 {
     /**
@@ -87,6 +103,57 @@ public:
             bitmask = other.getBitmask();
         }
         return *this;
+    }
+
+    // Formatting
+    std::string yearRequestStartString() const {
+        return std::to_string(getYear()) + ((bitmask & 1) == 0 ? " bc" : " ad");
+    }
+    std::string yearRequestEndString() const {
+        if ((bitmask & 1) == 0) {
+            return std::to_string(getYear() + 1) + "ad";
+        }
+        return std::to_string(getYear() - 1) + "bc";
+    }
+    std::string dayRequestStartString() const {
+        return std::to_string(getYear()) + ((bitmask & 1) == 0 ? " bc" : " ad") + "-" + month_strings[getMonth()] + "-" + std::to_string(getDay());
+    }
+    std::string dayRequestEndString() const {
+        const std::unordered_map<MONTH, unsigned char> days_in_month = {
+            {JANUARY, 31},
+            {FEBRUARY, 29},
+            {MARCH, 31},
+            {APRIL, 30},
+            {MAY, 31},
+            {JUNE, 30},
+            {JULY, 31},
+            {AUGUST, 31},
+            {SEPTEMBER, 30},
+            {OCTOBER, 31},
+            {NOVEMBER, 30},
+            {DECEMBER, 31}
+        };
+
+        MONTH month = getMonth();
+        unsigned char day = getDay();
+        unsigned int year = getYear();
+        if (day == days_in_month.at(month)) { // Overflow Month
+            if (month == DECEMBER) { // Overflow Year
+                month = JANUARY;
+                day = 1;
+                if ((bitmask & 1) == 0) {
+                    year++;
+                } else {
+                    year--;
+                }
+            } else {
+                month = static_cast<MONTH>(month + 1);
+                day = 1;
+            }
+        } else { // Next Day
+            day++;
+        }
+        return (std::to_string(year) + ((bitmask & 1) == 0 ? " bc" : " ad") + "-" + std::to_string(month) + "-" + std::to_string(day));
     }
 };
 
@@ -166,6 +233,14 @@ public:
             bitmask = other.getBitmask();
         }
         return *this;
+    }
+
+    // Formatting
+    std::string getDateString() const {
+        return std::to_string(getYear()) + ((bitmask & 1) == 0 ? " bc" : " ad") + "-" + month_strings[getMonth()] + "-" + std::to_string(getDay());
+    }
+    std::string getTimeString() const {
+        return std::to_string(getHour()) + ":" + std::to_string(getMinute()) + ":" + std::to_string(getSecond()) + "." + std::to_string(getMillisecond());
     }
 };
 

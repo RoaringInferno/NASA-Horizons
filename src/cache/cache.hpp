@@ -27,11 +27,18 @@ class CacheMeta
 {
     std::vector<CacheFileName> cache_files;
 public:
-    CacheMeta() : cache_files() {
+    CacheMeta() {
         for (const auto& entry : std::filesystem::directory_iterator(CACHE_PATH)) {
             if (entry.is_regular_file()) {
-                cache_files.push_back(entry);
+                cache_files.push_back(CacheFileName(entry));
             }
         }
     }
+
+    /**
+     * @note DO NOT EDIT THE RETURN VALUE
+     */
+    std::vector<CacheFileName> getCacheFiles() const {
+        return cache_files;
+    };
 };

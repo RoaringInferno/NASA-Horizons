@@ -1,16 +1,25 @@
 #pragma once
 
+#include "../dates.hpp"
+
 #include <string>
 
 const std::string CACHE_PATH = "cache/";
 
+class FilePath
+{
+public:
+    virtual std::string getFileName() const = 0;
+    virtual std::string getPath() const = 0;
+};
+
 struct YearFileID
 {
     std::string object;
-    std::string year;
+    Date date;
 };
 
-class YearSaveFilePath
+class YearSaveFilePath : public FilePath
 {
     const YearFileID& id;
 
@@ -18,21 +27,28 @@ class YearSaveFilePath
 public:
     YearSaveFilePath(const YearFileID& id) : id(id) {};
 
-    std::string getFileName() const {
-        return id.object + "-" + id.year + YEAR_FILE_EXT;
+    std::string getFileName() const override {
+        if (id.date.getYear() < 0) {
+            return id.object + "-" + std::to_string(-id.date.getYear()) + "bc" + YEAR_FILE_EXT;
+        }
+        return id.object + "-" + std::to_string(id.date.getYear()) + "ad" + YEAR_FILE_EXT;
     };
-    std::string getPath() const {
+    std::string getPath() const override {
         return CACHE_PATH + getFileName();
+    };
+
+    YearFileID getID() const {
+        return id;
     };
 };
 
 struct DayFileID
 {
     std::string object;
-    std::string date;
+    Date date; // YYYY<ad/bc>-Mon-DD
 };
 
-class DaySaveFilePath
+class DaySaveFilePath : public FilePath
 {
     const DayFileID& id;
 
@@ -40,10 +56,14 @@ class DaySaveFilePath
 public:
     DaySaveFilePath(const DayFileID& id) : id(id) {};
 
-    std::string getFileName() const {
-        return id.object + "-" + id.date + DAY_FILE_EXT;
+    std::string getFileName() const override {
+        return id.object + "-" + id.date.dayRequestStartString() + DAY_FILE_EXT;
     };
-    std::string getPath() const {
+    std::string getPath() const override {
         return CACHE_PATH + getFileName();
+    };
+
+    DayFileID getID() const {
+        return id;
     };
 };

@@ -8,126 +8,72 @@
 
 #include "input_parsing.hpp"
 #include "equatorial-horizontal.hpp"
+#include "pull_request.hpp"
+#include "cache/cache.hpp"
 
 #include <iostream>
 #include <string>
 #include <vector>
+#include <thread>
 
-struct CLIArgs
+// Display a message to the console with the specified character width
+void displayPrint(std::string text, unsigned long width)
 {
-    std::vector<std::string> objects; // -o, --object
-    bool verbose = false; // -v, --verbose
-    bool detailed = false; // -d, --detailed
-    std::string latitude; // -l, --latitude
-    bool has_latitude = false;
-    std::vector<std::string> dates; // Args
-};
+    unsigned long text_length = text.length();
+    unsigned long padding = (width - text_length) / 2;
+    for (unsigned long i = 0; i < padding; ++i)
+    {
+        std::cout << " ";
+    }
+    std::cout << text;
+    for (unsigned long i = 0; i < padding; ++i)
+    {
+        std::cout << " ";
+    }
+}
 
 int main(int argc, char** argv)
 {
-    CLIArgs options;
+    CLIArgs options(argc, argv);
 
-    if (argc == 1) { return 0; }
-    for (unsigned long argi = 1; argi > 1; ++argi)
+    const unsigned long COLUMN_WIDTH = 29;
+
+    unsigned long object_count = options.args.object.size();
+    unsigned long date_count = options.args.date.size();
+
+    Query queries[date_count][object_count];
+    std::thread** threads = new std::thread*[date_count];
+    CacheMeta cache_meta;
+    for (unsigned long j = 0; j < date_count; ++j)
     {
-        std::string dry_arg = std::string(argv[argi]);
-        if (dry_arg[0] == '-')
+        threads[j] = new std::thread[object_count];
+        for (unsigned long i = 0; i < object_count; ++i)
         {
-            if (dry_arg[1] == '-')
-            {
-                // Parse long options
-                std::string arg = dry_arg.substr(2);
-                if (arg == "verbose") { options.verbose = true; }
-                else if (arg == "detailed") { options.detailed = true; }
-                else if (arg == "object")
-                {
-                    if (argi + 1 < argc)
-                    {
-                        options.objects.push_back(argv[argi + 1]);
-                        ++argi;
-                    }
-                    else
-                    {
-                        std::cerr << "Error: Expected argument after --object" << std::endl;
-                        return 1;
-                    }
-                }
-                else if (arg == "latitude")
-                {
-                    if (argi + 1 < argc)
-                    {
-                        options.has_latitude = true;
-                        options.latitude = std::string(argv[argi + 1]);
-                        ++argi;
-                    }
-                    else
-                    {
-                        std::cerr << "Error: Expected argument after --longitude" << std::endl;
-                        return 1;
-                    }
-                }
-            }
-            else
-            {
-                // Parse short options
-                std::string args = dry_arg.substr(1);
-                for (char arg : args)
-                {
-                    if (arg == 'v') { options.verbose = true; }
-                    else if (arg == 'd') { options.detailed = true; }
-                    else if (arg == 'o')
-                    {
-                        if (argi + 1 < argc)
-                        {
-                            options.objects.push_back(argv[argi + 1]);
-                            ++argi;
-                        }
-                        else
-                        {
-                            std::cerr << "Error: Expected argument after -o" << std::endl;
-                            return 1;
-                        }
-                    }
-                    else if (arg == 'l')
-                    {
-                        if (argi + 1 < argc)
-                        {
-                            options.has_latitude = true;
-                            options.latitude = std::string(argv[argi + 1]);
-                            ++argi;
-                        }
-                        else
-                        {
-                            std::cerr << "Error: Expected argument after -l" << std::endl;
-                            return 1;
-                        }
-                    }
-                }
-            }
+            queries[j][i] = {options.args.object[i], options.args.date[j]};
+            if (options.args.detailed) threads[j][i] = std::thread(pullDay, &queries[j][i], std::ref(cache_meta));
+            else threads[j][i] = std::thread(pullYear, &queries[j][i], std::ref(cache_meta));
         }
-        else
+    }
+    for (unsigned long i = 0; i < object_count; ++i)
+    {
+        for (unsigned long j = 0; j < date_count; ++j)
         {
-            // Add Arg
-            options.dates.push_back(dry_arg);
+            threads[j][i].join();
         }
     }
 
-    unsigned long object_count = options.objects.size();
-    unsigned long date_count = options.dates.size();
-
-    // Allocate
-    EquatorialCoordinate** coordinates = new EquatorialCoordinate*[date_count];
-    for (unsigned long i = 0; i < date_count; ++i)
+    for (unsigned long j = 0; j < date_count; ++j)
     {
-        coordinates[i] = new EquatorialCoordinate[object_count];
+        delete[] threads[j];
     }
-
-
-
-    // Deallocate coordinates
-    for (unsigned long i = 0; i < date_count; ++i)
+    for (unsigned long j = 0; j < date_count; ++j)
     {
-        delete[] coordinates[i];
+        std::cout << "Date: " << options.args.date[j].dayRequestStartString() << std::endl << "           ";
+        for (unsigned long i = 0; i < object_count; ++i)
+        {
+            std::cout << " ";
+            displayPrint(options.args.object[i], COLUMN_WIDTH);
+            std::cout << " |";
+        }
     }
-    delete[] coordinates;
 }
