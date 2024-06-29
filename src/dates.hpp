@@ -7,6 +7,9 @@
 
 #pragma once
 
+#include <string>
+#include <unordered_map>
+
 enum MONTH : unsigned char
 {
     ERR_MONTH = 0,
@@ -53,14 +56,20 @@ class Date
      * - 25-29 (5, 31): Day (1 - 31)
      * - 30-31 (2, 3): Not used
      */
-    unsigned int bitmask;
+    uint32_t bitmask;
 public:
-    Date(unsigned int year = 0, unsigned char month = 0, unsigned char day = 0, bool ad = true) : bitmask(((ad) ? (year & 0xFFFFF) << 1 : (1 << 1) | ((-year & 0xFFFFF) << 1)) | (month << 21) | (day << 25)) {}
+    Date(unsigned int year = 0, MONTH month = ERR_MONTH, unsigned char day = 0, bool ad = true) : bitmask(0) {
+        setYear(year);
+        setMonth(month);
+        setDay(day);
+        bitmask |= (ad ? 1 : 0);
+    }
     Date(const Date& other) : bitmask(other.getBitmask()) {}
 
     // Getters
     unsigned int getBitmask() const { return bitmask; }
-    signed int getYear() const { return ((bitmask & 1) == 0) ? -(bitmask >> 1) & 0xFFFFF : (bitmask >> 1) & 0xFFFFF; }
+    unsigned int getYear() const { return (bitmask >> 1) & 0xFFFFF; }
+    bool getAD() const { return (bitmask & 1) == 1; }
     MONTH getMonth() const {
         switch ((bitmask >> 21) & 0xF) {
             case 1:
@@ -107,7 +116,7 @@ public:
 
     // Formatting
     std::string yearRequestStartString() const {
-        return std::to_string(getYear()) + ((bitmask & 1) == 0 ? " bc" : " ad");
+        return std::to_string(getYear()) + ((bitmask & 1) == 0 ? "bc" : "ad");
     }
     std::string yearRequestEndString() const {
         if ((bitmask & 1) == 0) {
@@ -116,10 +125,10 @@ public:
         return std::to_string(getYear() - 1) + "bc";
     }
     std::string dayRequestStartString() const {
-        return std::to_string(getYear()) + ((bitmask & 1) == 0 ? " bc" : " ad") + "-" + month_strings[getMonth()] + "-" + std::to_string(getDay());
+        return std::to_string(getYear()) + ((bitmask & 1) == 0 ? "bc" : "ad") + "-" + month_strings[getMonth()] + "-" + std::to_string(getDay());
     }
     std::string dayRequestEndString() const {
-        const std::unordered_map<MONTH, unsigned char> days_in_month = {
+        std::unordered_map<MONTH, unsigned char> days_in_month = {
             {JANUARY, 31},
             {FEBRUARY, 29},
             {MARCH, 31},
@@ -153,7 +162,7 @@ public:
         } else { // Next Day
             day++;
         }
-        return (std::to_string(year) + ((bitmask & 1) == 0 ? " bc" : " ad") + "-" + std::to_string(month) + "-" + std::to_string(day));
+        return (std::to_string(year) + ((bitmask & 1) == 0 ? "bc" : "ad") + "-" + std::to_string(month) + "-" + std::to_string(day));
     }
 };
 
@@ -174,14 +183,20 @@ class DateTime
      * - 47-49 (3, 7): Millisecond (0 - 999)
      * - 50-63 (14, 16383): Not used
      */
-    unsigned long long bitmask;
+    uint64_t bitmask;
 public:
     DateTime(signed int year = 0, unsigned char month = 0, unsigned char day = 0, unsigned char hour = 0, unsigned char minute = 0, unsigned char second = 0, unsigned short millisecond = 0) : bitmask(((year < 0) ? (1 << 1) | ((-year & 0xFFFFF) << 1) : (year & 0xFFFFF) << 1) | (month << 21) | (day << 25) | (hour << 30) | (minute << 35) | (second << 41) | (millisecond << 47)) {}
     DateTime(const DateTime& other) : bitmask(other.getBitmask()) {}
+    DateTime(std::string file_bitmask) : bitmask(0) {
+        for (unsigned int i = 0; i < 8; i++) {
+            bitmask |= file_bitmask[i] << (i * 8);
+        }
+    }
 
     // Getters
     unsigned long long getBitmask() const { return bitmask; }
-    signed int getYear() const { return ((bitmask & 1) == 0) ? -(bitmask >> 1) & 0xFFFFF : (bitmask >> 1) & 0xFFFFF; }
+    unsigned int getYear() const { return (bitmask >> 1) & 0xFFFFF; }
+    bool getAD() const { return (bitmask & 1) == 1; }
     MONTH getMonth() const {
         switch ((bitmask >> 21) & 0xF)
         {
@@ -221,7 +236,8 @@ public:
 
     // Setters
     void setBitmask(unsigned long long bitmask) { this->bitmask = bitmask; }
-    void setYear(signed int year) { bitmask = (year < 0) ? (1 << 1) | ((-year & 0xFFFFF) << 1) : (year & 0xFFFFF) << 1; }
+    void setYear(unsigned int year) { (year & 0xFFFFF) << 1; }
+    void setAD(bool ad) { bitmask = (bitmask & ~1) | (ad ? 1 : 0); }
     void setMonth(MONTH month) { bitmask = (bitmask & ~(0xF << 21)) | (month << 21); }
     void setDay(unsigned char day) { bitmask = (bitmask & ~(0x1F << 25)) | (day << 25); }
     void setHour(unsigned char hour) { bitmask = (bitmask & ~(0x1F << 30)) | (hour << 30); }
@@ -237,7 +253,7 @@ public:
 
     // Formatting
     std::string getDateString() const {
-        return std::to_string(getYear()) + ((bitmask & 1) == 0 ? " bc" : " ad") + "-" + month_strings[getMonth()] + "-" + std::to_string(getDay());
+        return std::to_string(getYear()) + (getAD() ? " bc" : " ad") + "-" + month_strings[getMonth()] + "-" + std::to_string(getDay());
     }
     std::string getTimeString() const {
         return std::to_string(getHour()) + ":" + std::to_string(getMinute()) + ":" + std::to_string(getSecond()) + "." + std::to_string(getMillisecond());

@@ -24,7 +24,7 @@ public:
     Longitude getLongitude() const { return longitude; }
 
     // Setters
-    void setLatitude(const Latitude& vertical) { this->latitude = latitude; }
+    void setLatitude(const Latitude& vertical) { this->latitude = vertical; }
     void setLongitude(const Longitude& longitude) { this->longitude = longitude; }
     SurfaceCoordinate& operator=(const SurfaceCoordinate& other) {
         if (this != &other) {

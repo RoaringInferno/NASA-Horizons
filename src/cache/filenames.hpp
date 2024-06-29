@@ -50,11 +50,12 @@ struct DayFileID
 
 class DaySaveFilePath : public FilePath
 {
-    const DayFileID& id;
+    DayFileID id;
 
     const std::string DAY_FILE_EXT = ".horizonday";
 public:
-    DaySaveFilePath(const DayFileID& id) : id(id) {};
+    DaySaveFilePath() : id(*(new DayFileID())) {};
+    DaySaveFilePath(DayFileID id) : id(id) {};
 
     std::string getFileName() const override {
         return id.object + "-" + id.date.dayRequestStartString() + DAY_FILE_EXT;
@@ -66,4 +67,12 @@ public:
     DayFileID getID() const {
         return id;
     };
+
+    DaySaveFilePath& operator=(const DaySaveFilePath& other) {
+        if (this == &other) {
+            return *this;
+        }
+        id = other.id;
+        return *this;
+    }
 };

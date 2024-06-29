@@ -2,6 +2,7 @@
 
 #include "../dates.hpp"
 #include "../coordinates/surface.hpp"
+#include "../debugging.hpp"
 
 #include <string>
 #include <unordered_map>
@@ -9,13 +10,12 @@
 class HorizonsAPICallParameters
 {
     // Parameters
-    std::unordered_map<const std::string, std::string> parameters = {
+    std::unordered_map<std::string, std::string> parameters = {
         // Common
         {"format", "text"},
         {"OBJ_DATA", "NO"},
 
         // Ephemeris-specific
-        {"SITE_COORD", "0,0,0"},
         {"SUPPRESS_RANGE_RATE", "YES"},
     };
 public:
@@ -24,7 +24,7 @@ public:
 
     void setParameter(const std::string& key, const std::string& value) { parameters[key] = value; }
 
-    std::unordered_map<const std::string, std::string> getParameters() const { return parameters; }
+    std::unordered_map<std::string, std::string> getParameters() const { return parameters; }
 };
 
 class HorizonsPull
@@ -45,10 +45,13 @@ public:
         for (auto& [key, value] : api_call.getParameters()) {
             url += key + "=" + value + "&";
         }
+        url.pop_back(); // Remove the trailing '&'
         return url;
     }
 
     void makeRequest(std::string output_file_path) const {
-        system(("curl " + generateRequestURL() + " -s >> " + output_file_path).c_str());
+        DEBUG_PRINT("\t\tMaking Request: " << generateRequestURL());
+        DEBUG_PRINT("\t\tOutput File Path: " << output_file_path);
+        system(("curl \"" + generateRequestURL() + "\" -s >> " + output_file_path).c_str());
     }
 };

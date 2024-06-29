@@ -3,8 +3,10 @@
 #include "dates.hpp"
 #include "parsing.hpp"
 #include "coordinates/surface.hpp"
+#include "debugging.hpp"
 
 #include <string>
+#include <iostream>
 #include <vector>
 
 class CLIArgs
@@ -19,12 +21,14 @@ class CLIArgs
      */
     Date parseDate(ReadHead date)
     {
+        DEBUG_PRINT("\tParsing Date: " << date.readAll());
         MONTH month = ERR_MONTH;
         unsigned char day = 0;
         bool ad = true;
 
 
         // Parse Month
+        DEBUG_PRINT("\t\tParsing Month");
         switch (date.peek()) // First digit of month field
         {
             case '0':
@@ -85,25 +89,155 @@ class CLIArgs
                 //month = ERR_MONTH; // Month field was empty
                 break;
         };
+        const std::string months[] = {
+            "ERR",
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        };
+        DEBUG_PRINT("\t\tMonth: " << months[month]);
         date.advance(); // Colon between month and day
 
         // Parse Day
+        DEBUG_PRINT("\t\tParsing Day");
         date.advance(); // First digit of day field
         switch (date.peek())
         {
             case '0':
                 date.advance(); // Second digit of day field
+                switch(date.peek())
+                {
+                    case '1':
+                        day = 1;
+                        break;
+                    case '2':
+                        day = 2;
+                        break;
+                    case '3':
+                        day = 3;
+                        break;
+                    case '4':
+                        day = 4;
+                        break;
+                    case '5':
+                        day = 5;
+                        break;
+                    case '6':
+                        day = 6;
+                        break;
+                    case '7':
+                        day = 7;
+                        break;
+                    case '8':
+                        day = 8;
+                        break;
+                    case '9':
+                        day = 9;
+                        break;
+                };
                 break;
             case '1':
                 date.advance(); // Second digit of day field
+                switch (date.peek())
+                {
+                    case '0':
+                        day = 10;
+                        break;
+                    case '1':
+                        day = 11;
+                        break;
+                    case '2':
+                        day = 12;
+                        break;
+                    case '3':
+                        day = 13;
+                        break;
+                    case '4':
+                        day = 14;
+                        break;
+                    case '5':
+                        day = 15;
+                        break;
+                    case '6':
+                        day = 16;
+                        break;
+                    case '7':
+                        day = 17;
+                        break;
+                    case '8':
+                        day = 18;
+                        break;
+                    case '9':
+                        day = 19;
+                        break;
+                };
+                break;
+            case '2':
+                date.advance(); // Second digit of day field
+                switch (date.peek())
+                {
+                    case '0':
+                        day = 20;
+                        break;
+                    case '1':
+                        day = 21;
+                        break;
+                    case '2':
+                        day = 22;
+                        break;
+                    case '3':
+                        day = 23;
+                        break;
+                    case '4':
+                        day = 24;
+                        break;
+                    case '5':
+                        day = 25;
+                        break;
+                    case '6':
+                        day = 26;
+                        break;
+                    case '7':
+                        day = 27;
+                        break;
+                    case '8':
+                        day = 28;
+                        break;
+                    case '9':
+                        day = 29;
+                        break;
+                };
+                break;
+            case '3':
+                date.advance(); // Second digit of day field
+                switch(date.peek())
+                {
+                    case '0':
+                        day = 30;
+                        break;
+                    case '1':
+                        day = 31;
+                        break;
+                };
                 break;
             default:
                 //day = 0; // Day field was empty
                 break;
         };
+        DEBUG_PRINT("\t\tDay: " << std::to_string(day));
         date.advance(); // Colon between day and year
 
         // Parse Year
+        DEBUG_PRINT("\t\tParsing Year");
         date.advance(); // First digit of year field
         unsigned int year = stoi(date.read(YEAR_LENGTH));
         date.advance(YEAR_LENGTH); // AD/BC
@@ -113,6 +247,7 @@ class CLIArgs
         {
             ad = false;
         }
+        DEBUG_PRINT("\t\tYear: " << year << (ad ? " AD" : " BC"));
 
         return Date(year, month, day, ad);
     }
@@ -136,8 +271,8 @@ class CLIArgs
     }
 public:
     struct {
-        std::vector<std::string> object{};
-        std::vector<Date> date{};
+        std::vector<std::string> object;
+        std::vector<Date> date;
         Latitude latitude{0};
         bool has_latitude{false};
         bool verbose{false};
@@ -147,9 +282,13 @@ public:
 
     CLIArgs(int argc, char** argv)
     {
+        DEBUG_PRINT("Parsing CLI Arguments");
+        DEBUG_PRINT("Arg Count: " << argc);
+
         if (argc == 1) { return; }
-        for (unsigned long argi = 1; argi > 1; ++argi)
+        for (unsigned long argi = 1; argi < argc; ++argi)
         {
+            DEBUG_PRINT("Parsing Arg #" << argi << ": " << argv[argi]);
             std::string dry_arg = std::string(argv[argi]);
             if (dry_arg[0] == '-')
             {
@@ -162,30 +301,14 @@ public:
                     else if (arg == "eclipse") { this->args.eclipse = true; }
                     else if (arg == "object")
                     {
-                        if (argi + 1 < argc)
-                        {
-                            this->args.object.push_back(argv[argi + 1]);
-                            ++argi;
-                        }
-                        else
-                        {
-                            std::cerr << "Error: Expected argument after --object" << std::endl;
-                            return;
-                        }
+                        DEBUG_PRINT("Pushing --object");
+                        this->args.object.push_back(argv[++argi]);
                     }
                     else if (arg == "latitude")
                     {
-                        if (argi + 1 < argc)
-                        {
-                            this->args.has_latitude = true;
-                            this->args.latitude = parseLatitude(std::string(argv[argi + 1]));
-                            ++argi;
-                        }
-                        else
-                        {
-                            std::cerr << "Error: Expected argument after --longitude" << std::endl;
-                            return;
-                        }
+                        DEBUG_PRINT("Pushing --latitude");
+                        this->args.has_latitude = true;
+                        this->args.latitude = parseLatitude(std::string(argv[++argi]));
                     }
                 }
                 else
@@ -198,36 +321,21 @@ public:
                         else if (arg == 'd') { this->args.detailed = true; }
                         else if (arg == 'o')
                         {
-                            if (argi + 1 < argc)
-                            {
-                                this->args.object.push_back(argv[argi + 1]);
-                                ++argi;
-                            }
-                            else
-                            {
-                                std::cerr << "Error: Expected argument after -o" << std::endl;
-                                return;
-                            }
+                            DEBUG_PRINT("Pushing -o");
+                            this->args.object.push_back(argv[++argi]);
                         }
                         else if (arg == 'l')
                         {
-                            if (argi + 1 < argc)
-                            {
-                                this->args.has_latitude = true;
-                                this->args.latitude = parseLatitude(std::string(argv[argi + 1]));
-                                ++argi;
-                            }
-                            else
-                            {
-                                std::cerr << "Error: Expected argument after -l" << std::endl;
-                                return;
-                            }
+                            DEBUG_PRINT("Pushing -l");
+                            this->args.has_latitude = true;
+                            this->args.latitude = parseLatitude(std::string(argv[++argi]));
                         }
                     }
                 }
             }
             else
             {
+                DEBUG_PRINT("Pushing Date");
                 // Add Arg
                 this->args.date.push_back(parseDate(dry_arg));
             }

@@ -19,9 +19,14 @@ class CircularDegreeCoordinate
      * - 21-30 (10, 1023): Milliseconds(0-999)
      * - 31 (1, 1): Not used
      */
-    unsigned int bitmask;
+    uint32_t bitmask;
 public:
     CircularDegreeCoordinate() : bitmask(0) {}
+    CircularDegreeCoordinate(std::string file_bitmask) : bitmask(0) {
+        for (unsigned int i = 0; i < 4; i++) {
+            bitmask |= file_bitmask[i] << (i * 8);
+        }
+    }
     CircularDegreeCoordinate(long double radians) {
         long double degrees = radians * 180.0 / M_PI;
         unsigned short intDegrees = (unsigned short)degrees;
@@ -75,9 +80,14 @@ class VerticalDegreeCoordinate
      * - 20-29 (10, 1023): Milliseconds(0-999)
      * - 30-31 (2, 3): Not used
      */
-    unsigned int bitmask;
+    uint32_t bitmask;
 public:
     VerticalDegreeCoordinate() : bitmask(0) {}
+    VerticalDegreeCoordinate(std::string file_bitmask) : bitmask(0) {
+        for (unsigned int i = 0; i < 4; i++) {
+            bitmask |= file_bitmask[i] << (i * 8);
+        }
+    }
     VerticalDegreeCoordinate(long double radians) {
         bool sign = radians < 0;
         long double degrees = fabs(radians) * 180.0 / M_PI;
