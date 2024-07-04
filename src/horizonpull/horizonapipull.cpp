@@ -1,6 +1,7 @@
 #include "horizonapipull.hpp"
 
 #include <unordered_map>
+#include <iostream>
 
 
 const std::string API_URL = "https://ssd.jpl.nasa.gov/api/horizons.api";
@@ -10,8 +11,9 @@ std::string generate_request_url(std::unordered_map<std::string, std::string> &p
     std::string url = API_URL + "?";
     for (auto &param : params)
     {
-        url += "&" + param.first + "=" + param.second;
+        url +=  param.first + "=" + param.second + "&";
     }
+    url.pop_back();
     return url;
 }
 

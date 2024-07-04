@@ -5,7 +5,7 @@ void parse_args(int argc, char *argv[], Args &args)
     int i = 1;
 
     auto next_arg = [&]() -> std::string {
-        return argv[i++];
+        return std::string(argv[++i]);
     };
 
     for (; i < argc; i++)
