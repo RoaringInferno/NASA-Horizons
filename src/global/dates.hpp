@@ -55,4 +55,5 @@ public:
     void increment_day();
 
     std::string to_string() const;
+    std::string to_string_url_encoded() const;
 };

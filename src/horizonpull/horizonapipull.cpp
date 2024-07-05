@@ -1,10 +1,13 @@
 #include "horizonapipull.hpp"
+#include "../global/url.hpp"
 
 #include <unordered_map>
 #include <iostream>
 
 
 const std::string API_URL = "https://ssd.jpl.nasa.gov/api/horizons.api";
+
+const std::string SHELL_APOSTROPHE = "'\\''";
 
 std::string generate_request_url(std::unordered_map<std::string, std::string> &params)
 {
@@ -29,9 +32,9 @@ void pull_from_horizon_api(const std::string &object, const Date &date, const st
     Date stop_date = date;
     stop_date.increment_day();
 
-    params["COMMAND"] = "'" + object + "'";
-    params["START_TIME"] = "'" + date.to_string() + " 00:00:00'";
-    params["STOP_TIME"] = "'" + stop_date.to_string() + " 00:00:00'";
+    params["COMMAND"] = SHELL_APOSTROPHE + object + SHELL_APOSTROPHE;
+    params["START_TIME"] = SHELL_APOSTROPHE + date.to_string_url_encoded() + URL_SPACE + "00" + URL_COLON + "00" + URL_COLON + "00" + SHELL_APOSTROPHE;
+    params["STOP_TIME"] = SHELL_APOSTROPHE + stop_date.to_string_url_encoded() + URL_SPACE + "00" + URL_COLON + "00" + URL_COLON + "00" + SHELL_APOSTROPHE;
     params["STEP_SIZE"] = "'1m'";
 
     std::string url = generate_request_url(params);

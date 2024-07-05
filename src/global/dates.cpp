@@ -1,4 +1,5 @@
 #include "dates.hpp"
+#include "url.hpp"
 
 const std::string MONTH_STRINGS[] = {
     "ERR_MONTH",
@@ -103,4 +104,9 @@ void Date::increment_day()
 std::string Date::to_string() const
 {
     return std::to_string(this->get_year()) + ":" + month_to_string(this->get_month()) + ":" + std::to_string(this->get_day());
+}
+
+std::string Date::to_string_url_encoded() const
+{
+    return std::to_string(this->get_year()) + URL_COLON + month_to_string(this->get_month()) + URL_COLON + std::to_string(this->get_day());
 }

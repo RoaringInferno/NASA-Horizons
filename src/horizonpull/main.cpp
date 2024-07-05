@@ -60,9 +60,10 @@ int main(int argc, char* argv[])
     Args args;
     parse_args(argc, argv, args);
 
+
     auto start = std::chrono::high_resolution_clock::now();
-    pull_in_sequence(args);
-    //pull_in_parallel(args);
+    //pull_in_sequence(args);
+    pull_in_parallel(args);
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
 
