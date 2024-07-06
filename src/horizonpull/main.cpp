@@ -1,20 +1,15 @@
-#include "../global/dates.hpp"
-#include "../global/input_parsing.hpp"
+#include "dates.hpp"
+#include "input_parsing.hpp"
 #include "horizonapipull.hpp"
+#include "horizons.hpp"
 
 #include <thread>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <chrono>
+#include <filesystem>
 
-
-const std::string OUTPUT_DIR = "horizonpulls/";
-
-std::string generate_output_path(const std::string &object, const Date &date)
-{
-    return OUTPUT_DIR + object + "_" + date.to_string() + ".horizonday";
-}
 
 void pull_in_sequence(const Args& args)
 {
@@ -22,7 +17,8 @@ void pull_in_sequence(const Args& args)
     {
         for (const Date &date : args.dates)
         {
-            std::string output_path = generate_output_path(object, date);
+            std::string output_path = HORIZONPULL_OUTPUT_DIR + generate_horizonpull_output_filename(object, date);
+            if (std::filesystem::exists(output_path)) continue;
             pull_from_horizon_api(object, date, output_path);
         }
     }
@@ -30,7 +26,8 @@ void pull_in_sequence(const Args& args)
 
 void parallel_pull(const std::string& object, const std::vector<Date>& dates) {
     for (const Date& date : dates) {
-        std::string output_path = generate_output_path(object, date);
+        std::string output_path = HORIZONPULL_OUTPUT_DIR + generate_horizonpull_output_filename(object, date);
+        if (std::filesystem::exists(output_path)) continue;
         pull_from_horizon_api(object, date, output_path);
     }
 }
@@ -50,7 +47,7 @@ void pull_in_parallel(const Args& args)
 
 void ensure_output_dir()
 {
-    std::string command = "mkdir -p " + OUTPUT_DIR;
+    std::string command = "mkdir -p " + HORIZONPULL_OUTPUT_DIR;
     system(command.c_str());
 }
 
@@ -62,12 +59,12 @@ int main(int argc, char* argv[])
 
 
     auto start = std::chrono::high_resolution_clock::now();
-    //pull_in_sequence(args);
-    pull_in_parallel(args);
+    pull_in_sequence(args);
+    //pull_in_parallel(args);
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
 
 
-    std::cout << "Operation completed in " << elapsed.count() << " seconds\n";
+    //std::cout << "Operation completed in " << elapsed.count() << " seconds\n";
     return 0;
 }

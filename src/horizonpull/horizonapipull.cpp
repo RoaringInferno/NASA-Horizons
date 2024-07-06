@@ -1,5 +1,5 @@
 #include "horizonapipull.hpp"
-#include "../global/url.hpp"
+#include "url.hpp"
 
 #include <unordered_map>
 #include <iostream>
