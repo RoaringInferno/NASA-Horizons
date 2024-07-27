@@ -141,17 +141,18 @@ void HorizonEphemeris::writeCSV(const std::string &file_path) const
 {
     if (this->lines == nullptr)
     {
-        system(("echo \"" + this->CSV_HEADER + "\" >> " + file_path).c_str());
+        system(("echo \"" + this->CSV_HEADER + "\"\r" >> " + file_path).c_str());
         return;
     }
 
     // Create the CSV string
-    std::string csv = this->CSV_HEADER + "\n";
+    std::string csv = this->CSV_HEADER + "\r\n";
 
     for (size_t i = 0; i < this->line_count; i++)
     {
-        csv += this->lines[i].writeCSV() + "\n";
+        csv += this->lines[i].writeCSV() + "\r\n";
     }
+    csv.pop_back();
 
     // Write the CSV string to a file
     std::string command = "echo \"" + csv + "\" >> " + file_path;
